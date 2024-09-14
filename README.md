@@ -58,6 +58,9 @@ Após a instalação, você pode acessar a aplicação em seu navegador no ender
 | Listagem    | Visualiza os produtos coletados        | `/products`     |
 | Exportação  | Exporta os produtos coletados em CSV   | `/export-csv`   |
 
-## Licença
+## Observação
 
-Este projeto é licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
+- *Paginação*: O scraping está configurado para coletar dados de até 2 páginas. Para alterar esse número, modifique a variável `$totalPages` no método `scrape` do `ScrapingController`.
+
+- *URL Utilizada*: A URL base para scraping é `https://www.mercadolivre.com.br/ofertas?container_id=MLB779362-1&page=`. Para alterar esta URL, modifique a variável `$baseUrl` no método `scrape` do `ScrapingController`.
+
