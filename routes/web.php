@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScrapingController;
@@ -34,9 +35,10 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/scrape', [ScrapingController::class, 'scrape']);
-Route::get('/products', [ScrapingController::class, 'index'])->name('products.index');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-Route::get('/export-csv', [ScrapingController::class, 'exportCsv'])->name('export.csv');
+Route::get('/scrape', [ScrapingController::class, 'scrape']);
+Route::get('/export-csv', [ScrapingController::class, 'exportCsv'])->name('products.exportCsv');
+
 
 require __DIR__ . '/auth.php';

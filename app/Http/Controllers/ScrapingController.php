@@ -3,82 +3,99 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScrapingController extends Controller
 {
+
+    public function index()
+    {
+        // Lógica do método index
+        return view('admin.products.index');
+    }
     public function scrape()
     {
-        // Definir a URL de busca no Mercado Livre
-        $url = 'https://www.mercadolivre.com.br/';
+        // Definir a URL base de busca no Mercado Livre
+        $baseUrl = 'https://www.mercadolivre.com.br/ofertas?container_id=MLB779362-1&page=';
 
-        // Obter o HTML da página usando file_get_contents
-        $html = file_get_contents($url);
+        // Definir o número de páginas a serem percorridas
+        $totalPages = 2; // Ajuste conforme necessário
 
-        // Verificar se a requisição foi bem-sucedida
-        if ($html === FALSE) {
-            die('Erro ao acessar a URL');
-        }
+        for ($page = 1; $page <= $totalPages; $page++) {
+            // Construir a URL da página atual
+            $url = $baseUrl . $page;
 
-        // Criar um novo DOMDocument
-        $dom = new \DOMDocument();
+            // Obter o HTML da página usando file_get_contents
+            $html = file_get_contents($url);
 
-        // Carregar o HTML (suprimir warnings devido a tags malformadas)
-        @$dom->loadHTML($html);
+            // Verificar se a requisição foi bem-sucedida
+            if ($html === FALSE) {
+                die('Erro ao acessar a URL: ' . $url);
+            }
 
-        // Criar um DOMXPath para navegar no DOM
-        $xpath = new \DOMXPath($dom);
+            // Criar um novo DOMDocument
+            $dom = new \DOMDocument();
 
-       // Encontrar os títulos dos produtos
-       $titles = $xpath->query('//a[contains(@class, "poly-component__title")]');
-       $prices = $xpath->query('//div[contains(@class, "poly-price__current")]//span[contains(@class, "andes-money-amount__fraction")]');
-       $types = $xpath->query('//div[contains(@class, "ui-recommendations-title-link")]');
+            // Carregar o HTML (suprimir warnings devido a tags malformadas)
+            @$dom->loadHTML($html);
 
-        // Verificar se encontramos títulos e preços
-        if ($titles->length === 0 || $prices->length === 0) {
-            die('Nenhum produto encontrado');
-        }
+            // Criar um DOMXPath para navegar no DOM
+            $xpath = new \DOMXPath($dom);
 
-        // Iterar sobre os títulos, preços e tipos e salvar no banco de dados
-        for ($i = 0; $i < $titles->length; $i++) {
-            $title = $titles->item($i)->nodeValue;
-            $price = $prices->item($i)->nodeValue;
-            $type = $types->length > $i ? $types->item($i)->nodeValue : 'Desconhecido';
+            // Encontrar os títulos dos produtos
+            $names = $xpath->query("//div[contains(@class, 'promotion-item__description')]//p[contains(@class, 'promotion-item__title')]");
+            // Encontrar os preços antigos dos produtos
+            $oldPrices = $xpath->query("//div[contains(@class, 'promotion-item__discount-component')]//s[contains(@class, 'andes-money-amount__fraction')]");
+            // Encontrar os preços novos dos produtos
+            $newPrices = $xpath->query("//div[contains(@class, 'promotion-item__discount-component')]//div[contains(@class, 'andes-money-amount-combo__main-container')]//span[contains(@class, 'andes-money-amount__fraction')]");
 
-            // Criar um novo produto e salvar no banco de dados
-            $product = new Product();
-            $product->title = $title;
-            $product->price = $price;
-            $product->type = $type; // Adicionando o tipo do produto
-            $product->save();
+            // Verificar se encontramos títulos e preços
+            if ($names->length === 0 || $oldPrices->length === 0 || $newPrices->length === 0) {
+                continue; // Pular para a próxima página se não encontrar produtos
+            }
+
+            // Iterar sobre os títulos e preços e salvar no banco de dados
+            for ($i = 0; $i < $names->length; $i++) {
+                $name = $names->item($i)->nodeValue;
+                $oldPrice = $oldPrices->item($i)->nodeValue;
+                $newPrice = $newPrices->item($i)->nodeValue;
+
+                // Criar um novo produto e salvar no banco de dados
+                $product = new Product();
+                $product->name = $name;
+                $product->old_price = $oldPrice;
+                $product->new_price = $newPrice;
+                $product->save();
+            }
         }
 
         return response()->json(['message' => 'Scraping concluído com sucesso']);
-    }
-
-    // Método para listar os produtos armazenados no banco de dados
-    public function index()
-    {
-        // Buscar todos os produtos do banco de dados
-        $products = Product::all();
-
-        // Retornar a view com os produtos
-        return view('products.index', ['products' => $products]);
     }
 
     public function exportCsv()
     {
         $products = Product::all();
 
-        $csvData = "Title,Price,Type\n";
+        $response = new StreamedResponse(function() use ($products) {
+            $handle = fopen('php://output', 'w');
 
-        foreach ($products as $product) {
-            $csvData .= "{$product->title},{$product->price},{$product->type}\n";
-        }
+            // Adicionar cabeçalhos das colunas
+            fputcsv($handle, ['Nome', 'Preço Antigo', 'Preço Novo']);
 
-        $fileName = 'products_' . date('Ymd_His') . '.csv';
+            foreach ($products as $product) {
+                fputcsv($handle, [
+                    $product->name,
+                    $product->old_price,
+                    $product->new_price
+                ]);
+            }
 
-        return response($csvData)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', "attachment; filename={$fileName}");
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="products.csv"');
+
+        return $response;
     }
 }

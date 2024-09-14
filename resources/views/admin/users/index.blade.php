@@ -4,11 +4,11 @@
 
 @section('content')
 
-<a href="{{ route('users.create') }}" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mb-4 inline-block">Create User</a>
+{{-- <a href="{{ route('users.create') }}" class="px-4 py-2 bg-green-500  rounded hover:bg-green-600 mb-4 inline-block">Create User</a> --}}
 
 <x-alert />
 
-<table class="w-full table-auto">
+<table class="w-full table-auto my-4">
     <thead class="bg-gray-200">
         <tr>
             <th class="px-4 py-2 text-left">Name</th>
@@ -19,9 +19,9 @@
     <tbody>
         @forelse($users as $user)
             <tr class="border-b">
-                <td class="px-4 py-2 text-white">{{ $user->name }}</td>
-                <td class="px-4 py-2 text-white">{{ $user->email }}</td>
-                <td class="px-4 py-2 text-white">
+                <td class="px-4 py-2 ">{{ $user->name }}</td>
+                <td class="px-4 py-2 ">{{ $user->email }}</td>
+                <td class="px-4 py-2 ">
                     <a href="{{ route('users.edit', $user->id) }}" class="text-blue-500 hover:text-blue-600">Edit</a>
                     <a href="{{ route('users.show', $user->id) }}" class="text-blue-500 hover:text-blue-600">Detail</a>
                 </td>

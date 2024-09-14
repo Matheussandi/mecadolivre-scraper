@@ -10,5 +10,5 @@ class Product extends Model
     use HasFactory;
     
     // Permitir atribuição em massa
-    protected $fillable = ['title', 'price', 'type'];
+    protected $fillable = ['name', 'old_price', 'new_price'];
 }

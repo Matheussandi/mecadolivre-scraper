@@ -35,6 +35,8 @@ Este projeto realiza web scraping na página do Mercado Livre para coletar infor
     docker compose exec app php artisan migrate
     ```
 
+5. Precisa executar `npm i` para rodar o front (login e registe), depois `npm run dev`.
+
 ## Uso
 
 | Nome        | Descrição                              | Rota            |

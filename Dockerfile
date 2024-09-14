@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# set your user name, ex: user=carlos
+# set your user name
 ARG user=matheus
 ARG uid=1000
 
@@ -33,5 +33,17 @@ WORKDIR /var/www
 
 # Copy custom configurations PHP
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Copy project files
+COPY . /var/www
+
+# Install PHP dependencies with Composer
+RUN composer install --no-scripts --no-interaction
+
+# Generate application key
+RUN php artisan key:generate
+
+# Run database migrations
+RUN php artisan migrate
 
 USER $user
