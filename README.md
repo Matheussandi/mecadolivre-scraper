@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Este projeto realiza web scraping na página do Mercado Livre para coletar informações sobre produtos, como título, preço e tipo. Os dados coletados são armazenados em um banco de dados e podem ser exportados em formato CSV.
+Este projeto realiza web scraping na página do Mercado Livre para coletar informações sobre produtos, como título, preço antigo e preço novo. Os dados coletados são armazenados em um banco de dados e podem ser exportados em formato CSV.
 
 ## Funcionalidades
 
@@ -10,12 +10,16 @@ Este projeto realiza web scraping na página do Mercado Livre para coletar infor
 - Armazenamento dos dados em um banco de dados
 - Exportação dos dados em formato CSV
 
-## Requisitos
+### Pré-requisitos
 
-- Docker
-- Docker Compose
+- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Node.js](https://nodejs.org/) e [npm](https://www.npmjs.com/)
 
 ## Instalação
+
+### Passos
 
 1. Clone o repositório:
     ```sh
@@ -35,9 +39,17 @@ Este projeto realiza web scraping na página do Mercado Livre para coletar infor
     docker compose exec app php artisan migrate
     ```
 
-5. Precisa executar `npm i` para rodar o front (login e registe), depois `npm run dev`.
+5. Instale as dependências do frontend e inicie o servidor de desenvolvimento:
+    ```sh
+    npm install
+    npm run dev
+    ```
 
 ## Uso
+
+Após a instalação, você pode acessar a aplicação em seu navegador no endereço `http://localhost:8000`. Use as credenciais de login ou registre-se para acessar as funcionalidades da aplicação.
+
+## Rotas
 
 | Nome        | Descrição                              | Rota            |
 |-------------|----------------------------------------|-----------------|
